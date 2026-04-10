@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Neuro AI Study Planner 💜</title>
+<title>Final Boss Study Planner 💜👑</title>
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:sans-serif}
@@ -32,72 +32,9 @@ body{
   text-align:center;
 }
 
-/* APP */
-.app{
-  width:95%;
-  height:95vh;
-  display:flex;
-}
+.login h2{margin-bottom:10px}
 
-/* SIDEBAR */
-.sidebar{
-  width:240px;
-  padding:20px;
-}
-
-.sidebar button{
-  width:100%;
-  margin-top:8px;
-  padding:10px;
-  border:none;
-  border-radius:10px;
-  background:#a855f7;
-  color:white;
-  cursor:pointer;
-}
-
-/* MAIN */
-.main{
-  flex:1;
-  padding:20px;
-  overflow:auto;
-}
-
-/* CARD */
-.card{
-  padding:15px;
-  margin-bottom:20px;
-}
-
-/* TASK */
-.task{
-  background:white;
-  padding:8px;
-  margin-top:8px;
-  border-radius:8px;
-  cursor:pointer;
-}
-
-/* HEATMAP */
-.heatmap{
-  display:grid;
-  grid-template-columns:repeat(10,20px);
-  gap:5px;
-}
-.cell{
-  width:20px;height:20px;
-  background:#ddd;
-}
-.high{background:#a855f7}
-
-/* ENERGY */
-.energy{height:10px;background:#ddd;border-radius:10px}
-.energy-fill{height:100%;background:lime}
-
-/* TIMER */
-.timer{text-align:center;font-size:26px}
-
-input{
+input,select{
   width:100%;
   padding:10px;
   margin-top:10px;
@@ -113,19 +50,82 @@ button{
   border-radius:10px;
   background:#9333ea;
   color:white;
+  cursor:pointer;
 }
 
-/* FOCUS MODE */
-.focus{
-  position:fixed;
-  top:0;left:0;
-  width:100%;height:100%;
-  background:black;
-  color:white;
-  display:none;
+button:hover{background:#7e22ce}
+
+/* APP */
+.app{
+  width:95%;
+  height:95vh;
+  display:flex;
+}
+
+/* SIDEBAR */
+.sidebar{
+  width:240px;
+  padding:20px;
+}
+
+.avatar{
+  width:60px;height:60px;
+  border-radius:50%;
+  background:#9333ea;
+  display:flex;
   align-items:center;
   justify-content:center;
-  font-size:30px;
+  color:white;
+  font-size:24px;
+  margin-bottom:10px;
+}
+
+.nav button{background:#c084fc;margin-top:5px}
+
+/* MAIN */
+.main{
+  flex:1;
+  padding:20px;
+  overflow:auto;
+}
+
+/* CARD */
+.card{
+  padding:15px;
+  margin-bottom:20px;
+}
+
+/* GRID */
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+  gap:20px;
+}
+
+/* TASK */
+.task{
+  display:flex;
+  justify-content:space-between;
+  background:white;
+  padding:8px;
+  margin-top:8px;
+  border-radius:8px;
+}
+
+/* BAR */
+.bar{height:10px;background:#ddd;border-radius:10px}
+.fill{height:100%;background:#9333ea}
+
+/* TIMER */
+.timer{text-align:center;font-size:28px}
+
+/* TABLE */
+table{width:100%;margin-top:10px}
+td{
+  border:1px solid #aaa;
+  padding:10px;
+  text-align:center;
+  cursor:pointer;
 }
 </style>
 </head>
@@ -133,15 +133,13 @@ button{
 <body>
 
 <div id="app"></div>
-<div id="focusScreen" class="focus"></div>
 
 <script>
 let user = JSON.parse(localStorage.getItem("user"));
 let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
-let subjects = JSON.parse(localStorage.getItem("subjects")) || [];
-let exams = JSON.parse(localStorage.getItem("exams")) || [];
-let heat = JSON.parse(localStorage.getItem("heat")) || [];
-let energy = parseInt(localStorage.getItem("energy")) || 100;
+let goals = JSON.parse(localStorage.getItem("goals")) || [];
+let timetable = JSON.parse(localStorage.getItem("table")) || [];
+let xp = parseInt(localStorage.getItem("xp")) || 0;
 
 let section="dashboard";
 
@@ -152,21 +150,30 @@ function render(){
   if(!user){
     app.innerHTML=`
     <div class="glass login">
-      <h2>💜 Neuro Planner</h2>
-      <input id="name" placeholder="Enter name">
-      <button onclick="login()">Start</button>
+      <h2>💜 Welcome</h2>
+      <p>Study Planner</p>
+      <input id="name" placeholder="Name">
+      <input id="email" placeholder="Email">
+      <input id="pass" type="password" placeholder="Password">
+      <button onclick="signup()">Signup</button>
+      <button onclick="login()">Login</button>
     </div>`;
   } else {
     app.innerHTML=`
     <div class="app glass">
 
       <div class="sidebar">
+        <div class="avatar">${user.name[0]}</div>
         <h3>${user.name}</h3>
-        <button onclick="nav('dashboard')">Dashboard</button>
-        <button onclick="nav('tasks')">Tasks</button>
-        <button onclick="nav('ai')">AI Brain</button>
-        <button onclick="nav('focus')">Focus</button>
-        <button onclick="logout()">Logout</button>
+
+        <div class="nav">
+          <button onclick="nav('dashboard')">Dashboard</button>
+          <button onclick="nav('tasks')">Tasks</button>
+          <button onclick="nav('timetable')">Timetable</button>
+          <button onclick="nav('focus')">Focus</button>
+          <button onclick="nav('goals')">Goals</button>
+          <button onclick="logout()">Logout</button>
+        </div>
       </div>
 
       <div class="main" id="main"></div>
@@ -179,80 +186,96 @@ function render(){
 /* NAV */
 function nav(s){section=s; load();}
 
-/* LOAD */
+/* LOAD SECTION */
 function load(){
   const main=document.getElementById("main");
 
+  /* DASHBOARD */
   if(section==="dashboard"){
-    main.innerHTML=`
-      <div class="card glass">
-        <h2>🔥 Heatmap</h2>
-        <div class="heatmap" id="heatmap"></div>
-      </div>
+    const done=tasks.filter(t=>t.done).length;
+    const percent=tasks.length?(done/tasks.length)*100:0;
+    const level=Math.floor(xp/100);
 
-      <div class="card glass">
-        <h2>⚡ Energy</h2>
-        <div class="energy">
-          <div class="energy-fill" id="energyFill"></div>
+    main.innerHTML=`
+      <div class="grid">
+
+        <div class="card glass">
+          <h2>📊 Progress</h2>
+          <div class="bar"><div class="fill" style="width:${percent}%"></div></div>
+          <p>${Math.floor(percent)}% done</p>
+          <p>XP: ${xp} | Level: ${level}</p>
         </div>
-      </div>
-    `;
-    renderHeatmap();
-    updateEnergy();
+
+        <div class="card glass">
+          <h2>🧠 Motivation</h2>
+          <p id="quote"></p>
+          <button onclick="quote()">New</button>
+        </div>
+
+      </div>`;
+    quote();
   }
 
+  /* TASKS */
   if(section==="tasks"){
     main.innerHTML=`
       <div class="card glass">
         <h2>📋 Tasks</h2>
         <input id="task">
-        <button onclick="addTask()">Add Task</button>
+        <select id="cat">
+          <option>Study</option>
+          <option>Exam</option>
+        </select>
+        <button onclick="addTask()">Add</button>
         <div id="list"></div>
-      </div>
-    `;
-    renderTasks();
+      </div>`;
+    showTasks();
   }
 
-  if(section==="ai"){
+  /* GOALS */
+  if(section==="goals"){
     main.innerHTML=`
       <div class="card glass">
-        <h2>🤖 AI Brain</h2>
-
-        <input id="sub" placeholder="Subject">
-        <button onclick="addSubject()">Add Subject</button>
-
-        <input id="examSub" placeholder="Exam Subject">
-        <input id="examDate" type="date">
-        <button onclick="addExam()">Add Exam</button>
-
-        <button onclick="generatePlan()">Generate Plan</button>
-
-        <div id="suggestion"></div>
-        <div id="plan"></div>
-      </div>
-    `;
-    suggest();
+        <h2>🎯 Goals</h2>
+        <input id="goal">
+        <button onclick="addGoal()">Add</button>
+        <div id="glist"></div>
+      </div>`;
+    showGoals();
   }
 
+  /* TIMETABLE */
+  if(section==="timetable"){
+    main.innerHTML=`
+      <div class="card glass">
+        <h2>📅 Timetable</h2>
+        <table id="table"></table>
+      </div>`;
+    buildTable();
+  }
+
+  /* FOCUS */
   if(section==="focus"){
     main.innerHTML=`
       <div class="card glass">
-        <h2>⚡ Focus Mode</h2>
-        <button onclick="startFocus()">Start Deep Focus</button>
-      </div>
-    `;
+        <h2>⏳ Focus Mode</h2>
+        <div class="timer" id="timer">25:00</div>
+        <button onclick="start()">Start</button>
+      </div>`;
   }
 }
 
-/* LOGIN */
-function login(){
+/* AUTH */
+function signup(){
   const name=document.getElementById("name").value;
   if(!name) return alert("Enter name!");
   user={name};
   localStorage.setItem("user",JSON.stringify(user));
   render();
 }
-
+function login(){
+  signup();
+}
 function logout(){
   localStorage.clear();
   location.reload();
@@ -261,100 +284,89 @@ function logout(){
 /* TASKS */
 function addTask(){
   const t=document.getElementById("task").value;
-  tasks.push({text:t});
+  const c=document.getElementById("cat").value;
+  tasks.push({text:t,cat:c,done:false});
   localStorage.setItem("tasks",JSON.stringify(tasks));
   load();
 }
-
-function renderTasks(){
+function showTasks(){
   const list=document.getElementById("list");
   list.innerHTML="";
   tasks.forEach((t,i)=>{
     list.innerHTML+=`
-    <div class="task" onclick="complete(${i})">${t.text}</div>`;
+    <div class="task">
+      <span onclick="toggle(${i})">${t.done?"✅":""} ${t.text}</span>
+      <span onclick="del(${i})">❌</span>
+    </div>`;
   });
 }
-
-function complete(i){
-  energy-=10;
-  heat.push(3);
+function toggle(i){
+  tasks[i].done=!tasks[i].done;
+  if(tasks[i].done) xp+=10;
+  localStorage.setItem("tasks",JSON.stringify(tasks));
+  localStorage.setItem("xp",xp);
+  load();
+}
+function del(i){
   tasks.splice(i,1);
-  save();
+  localStorage.setItem("tasks",JSON.stringify(tasks));
   load();
 }
 
-/* ENERGY */
-function updateEnergy(){
-  document.getElementById("energyFill").style.width=energy+"%";
+/* GOALS */
+function addGoal(){
+  const g=document.getElementById("goal").value;
+  goals.push(g);
+  localStorage.setItem("goals",JSON.stringify(goals));
+  load();
+}
+function showGoals(){
+  const g=document.getElementById("glist");
+  g.innerHTML="";
+  goals.forEach(x=>g.innerHTML+=`<div class="task">${x}</div>`);
 }
 
-/* HEATMAP */
-function renderHeatmap(){
-  const map=document.getElementById("heatmap");
-  map.innerHTML="";
-  for(let i=0;i<50;i++){
-    const val=heat[i]||0;
-    map.innerHTML+=`<div class="cell ${val>2?'high':''}"></div>`;
+/* TIMETABLE */
+function buildTable(){
+  const table=document.getElementById("table");
+  table.innerHTML="";
+  for(let i=0;i<5;i++){
+    let row="<tr>";
+    for(let j=0;j<5;j++){
+      const val=timetable[i]?.[j]||"+";
+      row+=`<td onclick="edit(${i},${j},this)">${val}</td>`;
+    }
+    row+="</tr>";
+    table.innerHTML+=row;
   }
 }
-
-/* AI */
-function addSubject(){
-  const s=document.getElementById("sub").value;
-  subjects.push({name:s,weak:0});
-  save();
+function edit(i,j,cell){
+  const val=prompt("Enter subject");
+  if(!timetable[i]) timetable[i]=[];
+  timetable[i][j]=val;
+  localStorage.setItem("table",JSON.stringify(timetable));
+  cell.innerText=val;
 }
 
-function addExam(){
-  const name=document.getElementById("examSub").value;
-  const date=document.getElementById("examDate").value;
-  exams.push({name,date});
-  save();
+/* TIMER */
+let time=1500,timer;
+function start(){
+  timer=setInterval(()=>{
+    if(time>0){
+      time--;
+      const m=Math.floor(time/60);
+      const s=time%60;
+      document.getElementById("timer").innerText=`${m}:${s<10?'0':''}${s}`;
+    }
+  },1000);
 }
 
-function generatePlan(){
-  let plan=[];
-  exams.forEach(e=>{
-    let days=(new Date(e.date)-new Date())/(1000*60*60*24);
-    plan.push({name:e.name,priority:100-days});
-  });
-  plan.sort((a,b)=>b.priority-a.priority);
-
-  const div=document.getElementById("plan");
-  div.innerHTML="";
-  plan.forEach(p=>{
-    div.innerHTML+=`<div class="task">${p.name} 🔥</div>`;
-  });
+/* QUOTES */
+function quote(){
+  const q=["Win today 💜","No excuses 🔥","Focus now 🚀"];
+  document.getElementById("quote").innerText=q[Math.floor(Math.random()*q.length)];
 }
 
-function suggest(){
-  if(subjects.length===0) return;
-  subjects.sort((a,b)=>b.weak-a.weak);
-  document.getElementById("suggestion").innerText=
-    "Focus on: "+subjects[0].name;
-}
-
-/* FOCUS */
-function startFocus(){
-  if(tasks.length===0) return;
-
-  const screen=document.getElementById("focusScreen");
-  screen.innerText=tasks[0].text;
-  screen.style.display="flex";
-
-  setTimeout(()=>screen.style.display="none",5000);
-}
-
-/* SAVE */
-function save(){
-  localStorage.setItem("tasks",JSON.stringify(tasks));
-  localStorage.setItem("subjects",JSON.stringify(subjects));
-  localStorage.setItem("exams",JSON.stringify(exams));
-  localStorage.setItem("heat",JSON.stringify(heat));
-  localStorage.setItem("energy",energy);
-}
-
-/* INIT */
 render();
 </script>
 
