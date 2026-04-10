@@ -3,96 +3,129 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Study Planner 🌸</title>
+<title>Final Boss Study Planner 💜👑</title>
 
 <style>
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: linear-gradient(135deg, #fbcfe8, #e9d5ff, #fce7f3);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
+*{margin:0;padding:0;box-sizing:border-box;font-family:sans-serif}
+
+/* BACKGROUND */
+body{
+  height:100vh;
+  background:linear-gradient(135deg,#e6e6fa,#c084fc,#f3e8ff);
+  display:flex;
+  align-items:center;
+  justify-content:center;
 }
 
-/* Glass Card */
-.card {
-  background: rgba(255,255,255,0.3);
-  backdrop-filter: blur(10px);
-  padding: 25px;
-  border-radius: 20px;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-  width: 320px;
+/* GLASS */
+.glass{
+  background:rgba(255,255,255,0.3);
+  backdrop-filter:blur(15px);
+  border-radius:20px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.2);
 }
 
-h1 {
-  text-align: center;
-  color: #db2777;
+/* LOGIN */
+.login{
+  width:320px;
+  padding:25px;
+  text-align:center;
 }
 
-p {
-  text-align: center;
-  color: #555;
+.login h2{margin-bottom:10px}
+
+input,select{
+  width:100%;
+  padding:10px;
+  margin-top:10px;
+  border:none;
+  border-radius:10px;
 }
 
-input {
-  width: 100%;
-  padding: 10px;
-  margin-top: 10px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
+button{
+  width:100%;
+  padding:10px;
+  margin-top:10px;
+  border:none;
+  border-radius:10px;
+  background:#9333ea;
+  color:white;
+  cursor:pointer;
 }
 
-button {
-  margin-top: 10px;
-  padding: 10px;
-  width: 100%;
-  border: none;
-  border-radius: 10px;
-  background: #f472b6;
-  color: white;
-  cursor: pointer;
+button:hover{background:#7e22ce}
+
+/* APP */
+.app{
+  width:95%;
+  height:95vh;
+  display:flex;
 }
 
-button:hover {
-  background: #ec4899;
+/* SIDEBAR */
+.sidebar{
+  width:240px;
+  padding:20px;
 }
 
-.dashboard {
-  width: 800px;
+.avatar{
+  width:60px;height:60px;
+  border-radius:50%;
+  background:#9333ea;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:white;
+  font-size:24px;
+  margin-bottom:10px;
 }
 
-.grid {
-  display: flex;
-  gap: 20px;
+.nav button{background:#c084fc;margin-top:5px}
+
+/* MAIN */
+.main{
+  flex:1;
+  padding:20px;
+  overflow:auto;
 }
 
-.box {
-  flex: 1;
-  background: rgba(255,255,255,0.4);
-  padding: 15px;
-  border-radius: 15px;
+/* CARD */
+.card{
+  padding:15px;
+  margin-bottom:20px;
 }
 
-.task {
-  background: white;
-  padding: 8px;
-  margin-top: 10px;
-  border-radius: 8px;
-  display: flex;
-  justify-content: space-between;
+/* GRID */
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+  gap:20px;
 }
 
-.done {
-  text-decoration: line-through;
-  color: gray;
+/* TASK */
+.task{
+  display:flex;
+  justify-content:space-between;
+  background:white;
+  padding:8px;
+  margin-top:8px;
+  border-radius:8px;
 }
 
-.timer {
-  font-size: 30px;
-  text-align: center;
-  margin: 10px 0;
+/* BAR */
+.bar{height:10px;background:#ddd;border-radius:10px}
+.fill{height:100%;background:#9333ea}
+
+/* TIMER */
+.timer{text-align:center;font-size:28px}
+
+/* TABLE */
+table{width:100%;margin-top:10px}
+td{
+  border:1px solid #aaa;
+  padding:10px;
+  text-align:center;
+  cursor:pointer;
 }
 </style>
 </head>
@@ -102,144 +135,238 @@ button:hover {
 <div id="app"></div>
 
 <script>
-let user = null;
+let user = JSON.parse(localStorage.getItem("user"));
 let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
-let time = 1500;
-let running = false;
-let timer;
+let goals = JSON.parse(localStorage.getItem("goals")) || [];
+let timetable = JSON.parse(localStorage.getItem("table")) || [];
+let xp = parseInt(localStorage.getItem("xp")) || 0;
 
-// RENDER FUNCTION
-function render() {
-  const app = document.getElementById("app");
+let section="dashboard";
 
-  if (!user) {
-    app.innerHTML = `
-      <div class="card">
-        <h1>Study Planner 🌸</h1>
-        <p>Plan Smart, Study Better</p>
+/* RENDER */
+function render(){
+  const app=document.getElementById("app");
 
-        <input id="email" placeholder="Email">
-        <input id="password" type="password" placeholder="Password">
-
-        <button onclick="login()">Login</button>
-      </div>
-    `;
+  if(!user){
+    app.innerHTML=`
+    <div class="glass login">
+      <h2>💜 Welcome</h2>
+      <p>Study Planner</p>
+      <input id="name" placeholder="Name">
+      <input id="email" placeholder="Email">
+      <input id="pass" type="password" placeholder="Password">
+      <button onclick="signup()">Signup</button>
+      <button onclick="login()">Login</button>
+    </div>`;
   } else {
-    app.innerHTML = `
-      <div class="dashboard">
-        <h1>Hello, Student 🌸</h1>
+    app.innerHTML=`
+    <div class="app glass">
 
-        <div class="grid">
+      <div class="sidebar">
+        <div class="avatar">${user.name[0]}</div>
+        <h3>${user.name}</h3>
 
-          <div class="box">
-            <h3>📋 Tasks</h3>
-
-            <input id="taskInput" placeholder="Add task...">
-            <button onclick="addTask()">Add</button>
-
-            <div id="taskList"></div>
-          </div>
-
-          <div class="box">
-            <h3>⏳ Focus Mode</h3>
-
-            <div class="timer" id="timer"></div>
-
-            <button onclick="toggleTimer()">Start/Pause</button>
-            <button onclick="resetTimer()">Reset</button>
-          </div>
-
+        <div class="nav">
+          <button onclick="nav('dashboard')">Dashboard</button>
+          <button onclick="nav('tasks')">Tasks</button>
+          <button onclick="nav('timetable')">Timetable</button>
+          <button onclick="nav('focus')">Focus</button>
+          <button onclick="nav('goals')">Goals</button>
+          <button onclick="logout()">Logout</button>
         </div>
       </div>
-    `;
 
-    updateTasks();
-    updateTimer();
+      <div class="main" id="main"></div>
+
+    </div>`;
+    load();
   }
 }
 
-// LOGIN
-function login() {
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
+/* NAV */
+function nav(s){section=s; load();}
 
-  if (email && password) {
-    user = true;
-    render();
+/* LOAD SECTION */
+function load(){
+  const main=document.getElementById("main");
+
+  /* DASHBOARD */
+  if(section==="dashboard"){
+    const done=tasks.filter(t=>t.done).length;
+    const percent=tasks.length?(done/tasks.length)*100:0;
+    const level=Math.floor(xp/100);
+
+    main.innerHTML=`
+      <div class="grid">
+
+        <div class="card glass">
+          <h2>📊 Progress</h2>
+          <div class="bar"><div class="fill" style="width:${percent}%"></div></div>
+          <p>${Math.floor(percent)}% done</p>
+          <p>XP: ${xp} | Level: ${level}</p>
+        </div>
+
+        <div class="card glass">
+          <h2>🧠 Motivation</h2>
+          <p id="quote"></p>
+          <button onclick="quote()">New</button>
+        </div>
+
+      </div>`;
+    quote();
+  }
+
+  /* TASKS */
+  if(section==="tasks"){
+    main.innerHTML=`
+      <div class="card glass">
+        <h2>📋 Tasks</h2>
+        <input id="task">
+        <select id="cat">
+          <option>Study</option>
+          <option>Exam</option>
+        </select>
+        <button onclick="addTask()">Add</button>
+        <div id="list"></div>
+      </div>`;
+    showTasks();
+  }
+
+  /* GOALS */
+  if(section==="goals"){
+    main.innerHTML=`
+      <div class="card glass">
+        <h2>🎯 Goals</h2>
+        <input id="goal">
+        <button onclick="addGoal()">Add</button>
+        <div id="glist"></div>
+      </div>`;
+    showGoals();
+  }
+
+  /* TIMETABLE */
+  if(section==="timetable"){
+    main.innerHTML=`
+      <div class="card glass">
+        <h2>📅 Timetable</h2>
+        <table id="table"></table>
+      </div>`;
+    buildTable();
+  }
+
+  /* FOCUS */
+  if(section==="focus"){
+    main.innerHTML=`
+      <div class="card glass">
+        <h2>⏳ Focus Mode</h2>
+        <div class="timer" id="timer">25:00</div>
+        <button onclick="start()">Start</button>
+      </div>`;
   }
 }
 
-// TASKS
-function addTask() {
-  const input = document.getElementById("taskInput");
-  if (input.value.trim()) {
-    tasks.push({ text: input.value, done: false });
-    localStorage.setItem("tasks", JSON.stringify(tasks));
-    input.value = "";
-    updateTasks();
-  }
+/* AUTH */
+function signup(){
+  const name=document.getElementById("name").value;
+  if(!name) return alert("Enter name!");
+  user={name};
+  localStorage.setItem("user",JSON.stringify(user));
+  render();
+}
+function login(){
+  signup();
+}
+function logout(){
+  localStorage.clear();
+  location.reload();
 }
 
-function updateTasks() {
-  const list = document.getElementById("taskList");
-  list.innerHTML = "";
-
-  tasks.forEach((t, i) => {
-    const div = document.createElement("div");
-    div.className = "task";
-
-    div.innerHTML = `
-      <span class="${t.done ? 'done' : ''}" onclick="toggleTask(${i})">${t.text}</span>
-      <span onclick="deleteTask(${i})">❌</span>
-    `;
-
-    list.appendChild(div);
+/* TASKS */
+function addTask(){
+  const t=document.getElementById("task").value;
+  const c=document.getElementById("cat").value;
+  tasks.push({text:t,cat:c,done:false});
+  localStorage.setItem("tasks",JSON.stringify(tasks));
+  load();
+}
+function showTasks(){
+  const list=document.getElementById("list");
+  list.innerHTML="";
+  tasks.forEach((t,i)=>{
+    list.innerHTML+=`
+    <div class="task">
+      <span onclick="toggle(${i})">${t.done?"✅":""} ${t.text}</span>
+      <span onclick="del(${i})">❌</span>
+    </div>`;
   });
 }
-
-function toggleTask(i) {
-  tasks[i].done = !tasks[i].done;
-  localStorage.setItem("tasks", JSON.stringify(tasks));
-  updateTasks();
+function toggle(i){
+  tasks[i].done=!tasks[i].done;
+  if(tasks[i].done) xp+=10;
+  localStorage.setItem("tasks",JSON.stringify(tasks));
+  localStorage.setItem("xp",xp);
+  load();
+}
+function del(i){
+  tasks.splice(i,1);
+  localStorage.setItem("tasks",JSON.stringify(tasks));
+  load();
 }
 
-function deleteTask(i) {
-  tasks.splice(i, 1);
-  localStorage.setItem("tasks", JSON.stringify(tasks));
-  updateTasks();
+/* GOALS */
+function addGoal(){
+  const g=document.getElementById("goal").value;
+  goals.push(g);
+  localStorage.setItem("goals",JSON.stringify(goals));
+  load();
+}
+function showGoals(){
+  const g=document.getElementById("glist");
+  g.innerHTML="";
+  goals.forEach(x=>g.innerHTML+=`<div class="task">${x}</div>`);
 }
 
-// TIMER
-function updateTimer() {
-  const min = Math.floor(time / 60);
-  const sec = time % 60;
-  document.getElementById("timer").innerText =
-    `${min}:${sec < 10 ? '0' : ''}${sec}`;
-}
-
-function toggleTimer() {
-  running = !running;
-
-  if (running) {
-    timer = setInterval(() => {
-      if (time > 0) {
-        time--;
-        updateTimer();
-      }
-    }, 1000);
-  } else {
-    clearInterval(timer);
+/* TIMETABLE */
+function buildTable(){
+  const table=document.getElementById("table");
+  table.innerHTML="";
+  for(let i=0;i<5;i++){
+    let row="<tr>";
+    for(let j=0;j<5;j++){
+      const val=timetable[i]?.[j]||"+";
+      row+=`<td onclick="edit(${i},${j},this)">${val}</td>`;
+    }
+    row+="</tr>";
+    table.innerHTML+=row;
   }
 }
-
-function resetTimer() {
-  time = 1500;
-  clearInterval(timer);
-  running = false;
-  updateTimer();
+function edit(i,j,cell){
+  const val=prompt("Enter subject");
+  if(!timetable[i]) timetable[i]=[];
+  timetable[i][j]=val;
+  localStorage.setItem("table",JSON.stringify(timetable));
+  cell.innerText=val;
 }
 
-// INIT
+/* TIMER */
+let time=1500,timer;
+function start(){
+  timer=setInterval(()=>{
+    if(time>0){
+      time--;
+      const m=Math.floor(time/60);
+      const s=time%60;
+      document.getElementById("timer").innerText=`${m}:${s<10?'0':''}${s}`;
+    }
+  },1000);
+}
+
+/* QUOTES */
+function quote(){
+  const q=["Win today 💜","No excuses 🔥","Focus now 🚀"];
+  document.getElementById("quote").innerText=q[Math.floor(Math.random()*q.length)];
+}
+
 render();
 </script>
 
